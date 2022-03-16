@@ -1,16 +1,12 @@
-require 'csv'
+require 'json'
 
 class Game
 
   def initialize
-    generate_save_file unless File.exist?('saves.csv')
+    @first_line_csv = "'save_name', 'word', 'board', 'tries', 'misses'"
 
     @player = Player.new
     start_game
-  end
-
-  def generate_save_file
-    File.open("saves.csv", 'w') {|f| f.write("'save_name', 'word', 'board', 'tries', 'misses'") }
   end
 
   def start_game
@@ -88,24 +84,21 @@ class Game
 
   def options(option)
     if option.split(' ')[0] == 'save'
-      save_filename = option.split(' ')[1] #todo security
-      @saves = CSV.open('saves.csv', mode = "w", headers: true, header_converters: :symbol) do |row|
-        row[:save_name] = save_filename
-        row[:word] = @word
-        row[:board] = @board
-        row[:tries] = @tries
-        row[:misses] = @misses
-        #row << save, ...
-      end
+      save = {
+        "word" => @word,
+        "board" => @board,
+        "tries" => @tries,
+        "misses" => @misses
+      }
+      File.open("save.json", 'w') { |f| f.write(save.to_json) }
     elsif option.split(' ')[0] == 'load'
-      load_filename = option.split(' ')[1] #todo security
-      @saves = CSV.open('saves.csv', headers: true, header_converters: :symbol) do |row|
-        #row[:save_name] = save_filename
-        @word = row[:word]
-        @board = row[:board]
-        @tries = row[:tries]
-        @misses = row[:misses]
-      end
+      load = File.read("save.json")
+      load_file = JSON.parse(load)
+      @word = load_file["word"]
+      @board = load_file["board"]
+      @tries = load_file["tries"]
+      @misses = load_file["misses"]
+      print_board(' ') # print empty guess
     end
   end
 end
