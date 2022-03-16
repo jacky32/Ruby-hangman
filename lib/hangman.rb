@@ -10,9 +10,7 @@ class Game
   end
 
   def generate_save_file
-    file = File.open('saves.csv', 'w')
-    file.puts("'save_name','word','board','tries','misses'")
-    file.close
+    File.open("saves.csv", 'w') {|f| f.write("'save_name', 'word', 'board', 'tries', 'misses'") }
   end
 
   def start_game
@@ -27,7 +25,7 @@ class Game
   def gameloop
     while is_over != true
       guess = @player.guess_letter
-      if guess.length > 4
+      if guess.length > 3
         options(guess)
         next
       end
